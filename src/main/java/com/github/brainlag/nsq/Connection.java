@@ -121,12 +121,17 @@ public class Connection {
                 return;
             }
         }
+       
 
         if (frame instanceof ErrorFrame) {
             if (errorCallback != null) {
                 errorCallback.error(NSQException.of((ErrorFrame) frame));
             }
-            responses.add(frame);
+            try {
+                this.responses.offer(frame, 1, TimeUnit.SECONDS);
+            } catch (InterruptedException e) {
+                log.error("Dropping incoming frame error", e);
+            }
             return;
         }
 
